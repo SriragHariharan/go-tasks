@@ -7,6 +7,7 @@ import (
 
 	"github.com/sriraghariharan/gotasks/internal/models"
 	repo "github.com/sriraghariharan/gotasks/internal/repository"
+	"github.com/sriraghariharan/gotasks/internal/utils"
 )
 
 func CreateNewUser(ctx context.Context, user models.User)(models.User, error){
@@ -17,8 +18,15 @@ func CreateNewUser(ctx context.Context, user models.User)(models.User, error){
 	}
 
 	if userExists{
-		return models.User{}, fmt.Errorf("user already exists")
+		return models.User{}, errors.New("user already exists")
 	}
+
+	//hash password
+	hashedPassword, err := utils.HashPassword(user.Password)
+	if err != nil{
+		return models.User{}, errors.New("Something went wrong")
+	}
+	user.Password = hashedPassword
 
 	//save to db return user obj
 	newUser, err := repo.CreateNewUser(ctx, user)
@@ -40,10 +48,12 @@ func LoginUser(ctx context.Context, existingUser *models.User) (models.User, err
 		return models.User{}, errors.New("Invalid credentials")
 	}
 
-	//get user's password
+	//get hashed password from db
 	passwordFromDb, err:= repo.GetUserPassword(ctx, existingUser.Email)	
 
-	if existingUser.Password != passwordFromDb {
+	passwordValid := utils.VerifyPassword(existingUser.Password, passwordFromDb)
+
+	if passwordValid == false {
 		return models.User{}, errors.New("Invalid credentials")
 	}
 

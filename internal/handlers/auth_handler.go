@@ -86,6 +86,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{
 			"error": err.Error(),
 		})
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)
