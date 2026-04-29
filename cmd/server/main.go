@@ -5,9 +5,13 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	database "github.com/sriragharihara/gotasks/internal/db"
 )
 
 func main() {
+	//connect to database
+	database.Connect()
+
 	r := mux.NewRouter()
     r.HandleFunc("/", homeHandler)
 
