@@ -63,8 +63,6 @@ func GetUserDetails(ctx context.Context, email string) (models.User, error) {
 	var userDetails models.User
 	err := database.UsersCollection.FindOne(ctx, filter).Decode(&userDetails)
 
-	fmt.Printf("user details:%+v", userDetails)
-
 	if err != nil {
 		return models.User{}, errors.New("Unable to get details")
 	}
