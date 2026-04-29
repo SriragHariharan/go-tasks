@@ -1,0 +1,86 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Dependency directories
+vendor/
+node_modules/
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Build artifacts
+/bin/
+/dist/
+/build/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Coverage files
+*.cover
+*.coverprofile
+coverage.html
+coverage.out
+*.cgo1.go
+*.cgo2.c
+_cgo_defun.c
+_cgo_gotypes.go
+_cgo_export.*
+
+# Profile and performance files
+*.pprof
+cpu.out
+mem.out
+trace.out
+
+# Logs
+*.log
+logs/
+
+# Environment and config files
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.crt
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Generated files
+*.gen.go
+mock_*.go
+stringer_*.go
+
+# Test binaries
+*.test.exe
+
+# Dependency management
+# Glide
+glide.lock
+glide.yaml
+
+# Dep
+Gopkg.lock
+Gopkg.toml
