@@ -1,10 +1,9 @@
-module github.com/sriragharihara/gotasks
+module github.com/sriraghariharan/gotasks
 
 go 1.26.2
 
 require (
 	github.com/gorilla/mux v1.8.1
-	go.mongodb.org/mongo-driver v1.17.9
 	go.mongodb.org/mongo-driver/v2 v2.6.0
 )
 

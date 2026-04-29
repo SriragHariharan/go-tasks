@@ -1,10 +1,10 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import "go.mongodb.org/mongo-driver/v2/bson"
 
 type Task struct {
-	Id primitive.ObjectID `json:"id" bson:"_id"`
+	Id bson.ObjectID `json:"id" bson:"_id"`
 	Title string `json:"title" bson:"title"`
 	IsCompleted bool `json:"isCompleted" bson:"isCompleted"`
-	UserId primitive.ObjectID `json:"userId" bson:"userId"`
+	UserId bson.ObjectID `json:"userId" bson:"userId"`
 }
