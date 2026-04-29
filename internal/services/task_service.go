@@ -35,3 +35,26 @@ func CreateTask(ctx context.Context, task models.Task) (models.Task, error) {
 
 	return task, nil
 }
+
+func GetAllTasks(ctx context.Context) ([]models.Task, error) {
+	
+	// get UserId from context object
+	userIdStr, ok := ctx.Value(middleware.UserIDKey).(string)
+	if !ok {
+		return []models.Task{}, errors.New("user not found in context")
+	}
+
+	// userObjectID, err := bson.ObjectIDFromHex(userIdStr)
+	// if err != nil {
+	// 	return []models.Task{}, err
+	// }
+
+	allTasks, err := repo.GetAllTasksForUser(ctx, userIdStr)
+
+	if err != nil {
+		return []models.Task{}, err
+	}
+
+	return allTasks, nil
+}
+	

@@ -31,14 +31,50 @@ func GetTaskDetails(ctx context.Context, taskID string) (models.Task, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	filter := bson.M{"_id": taskID}
+	taskObjectID, err := bson.ObjectIDFromHex(taskID)
+	if err != nil {
+		return models.Task{}, errors.New("Invalid task ID")
+	}
+
+	filter := bson.M{"_id": taskObjectID}
 
 	var taskDetails models.Task
-	err := database.TasksCollection.FindOne(ctx, filter).Decode(&taskDetails)
+	err = database.TasksCollection.FindOne(ctx, filter).Decode(&taskDetails)
 
 	if err != nil {
 		return models.Task{}, errors.New("Unable to get task details")
 	}
 
 	return taskDetails, nil
+}
+
+//get all tasks for a user
+func GetAllTasksForUser(ctx context.Context, userID string) ([]models.Task, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	fmt.Println("userid", userID)
+
+	userObjectID, err := bson.ObjectIDFromHex(userID)
+	if err != nil {
+		return []models.Task{}, errors.New("Invalid user ID")
+	}
+
+	filter := bson.M{"userId": userObjectID}
+
+	cursor, err := database.TasksCollection.Find(ctx, filter)
+
+	if err != nil {
+		return []models.Task{}, errors.New("Unable to get tasks")
+	}
+
+	var tasks []models.Task
+	err = cursor.All(ctx, &tasks)
+
+	if err != nil {
+		return []models.Task{}, errors.New("Unable to get tasks")
+	}
+
+	fmt.Println("tasks", tasks)
+
+	return tasks, nil
 }
