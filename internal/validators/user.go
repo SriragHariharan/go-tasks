@@ -44,3 +44,23 @@ func NewUserValidator(user *models.User) error {
 
 	return nil
 }
+
+func ValidateExistingUser(existingUser *models.User) error {
+	//trim spaces
+	existingUser.Email = strings.TrimSpace(existingUser.Email)
+	existingUser.Password = strings.TrimSpace(existingUser.Password)
+
+	if existingUser.Email == "" {
+		return errors.New("email cannot be empty")
+	}
+
+	if _, err := mail.ParseAddress(existingUser.Email); err != nil {
+		return errors.New("invalid email address")
+	}
+
+	if existingUser.Password == "" {
+		return errors.New("password cannot be empty")
+	}
+	
+	return nil
+}

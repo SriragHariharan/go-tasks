@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/sriraghariharan/gotasks/internal/models"
@@ -23,5 +24,29 @@ func CreateNewUser(ctx context.Context, user models.User)(models.User, error){
 	newUser, err := repo.CreateNewUser(ctx, user)
 
 	return newUser, nil
+
+}
+
+func LoginUser(ctx context.Context, existingUser *models.User) (models.User, error) {
+	fmt.Println(existingUser)
+
+	userExists, err := repo.CheckUserExists(ctx, existingUser.Email)
+
+	if err != nil {
+		return models.User{}, err
+	}
+
+	if userExists == false {
+		return models.User{}, errors.New("Invalid credentials")
+	}
+
+	//get user's password
+	passwordFromDb, err:= repo.GetUserPassword(ctx, existingUser.Email)	
+
+	if existingUser.Password != passwordFromDb {
+		return models.User{}, errors.New("Invalid credentials")
+	}
+
+	return *existingUser, nil
 
 }

@@ -9,6 +9,7 @@ func AuthRoutes() *mux.Router {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/signup", handler.SignupHandler).Methods("POST")
+	r.HandleFunc("/login", handler.LoginHandler).Methods("POST")
 
 	return r
 }
