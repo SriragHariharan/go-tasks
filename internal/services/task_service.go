@@ -12,14 +12,9 @@ import (
 
 func CreateTask(ctx context.Context, task models.Task) (models.Task, error) {
 
-	userIdStr, ok := ctx.Value(middleware.UserIDKey).(string)
+	userObjectID, ok := ctx.Value(middleware.UserIDKey).(bson.ObjectID)
 	if !ok {
 		return models.Task{}, errors.New("user not found in context")
-	}
-
-	userObjectID, err := bson.ObjectIDFromHex(userIdStr)
-	if err != nil {
-		return models.Task{}, err
 	}
 
 	task.UserId = userObjectID
@@ -37,19 +32,14 @@ func CreateTask(ctx context.Context, task models.Task) (models.Task, error) {
 }
 
 func GetAllTasks(ctx context.Context) ([]models.Task, error) {
-	
+
 	// get UserId from context object
-	userIdStr, ok := ctx.Value(middleware.UserIDKey).(string)
+	userObjectID, ok := ctx.Value(middleware.UserIDKey).(bson.ObjectID)
 	if !ok {
 		return []models.Task{}, errors.New("user not found in context")
 	}
 
-	// userObjectID, err := bson.ObjectIDFromHex(userIdStr)
-	// if err != nil {
-	// 	return []models.Task{}, err
-	// }
-
-	allTasks, err := repo.GetAllTasksForUser(ctx, userIdStr)
+	allTasks, err := repo.GetAllTasksForUser(ctx, userObjectID)
 
 	if err != nil {
 		return []models.Task{}, err
@@ -57,4 +47,14 @@ func GetAllTasks(ctx context.Context) ([]models.Task, error) {
 
 	return allTasks, nil
 }
-	
+
+func DeleteTask(ctx context.Context, taskID bson.ObjectID, userID bson.ObjectID) (bool, error) {
+
+	taskDeleted, err := repo.DeleteTask(ctx, taskID, userID)
+
+	if err != nil {
+		return false, err
+	}
+
+	return taskDeleted, nil
+}

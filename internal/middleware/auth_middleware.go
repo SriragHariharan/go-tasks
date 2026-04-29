@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/sriraghariharan/gotasks/internal/utils"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type contextKey string
@@ -37,8 +38,15 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
+		// convert userId to object id
+		userObjectID, err := bson.ObjectIDFromHex(userID)
+		if err != nil {
+			http.Error(w, "invalid User", http.StatusUnauthorized)
+			return
+		}
+
 		// attach userId to request context
-		ctx := context.WithValue(r.Context(), UserIDKey, userID)
+		ctx := context.WithValue(r.Context(), UserIDKey, userObjectID)
 
 		// pass to next handler
 		next.ServeHTTP(w, r.WithContext(ctx))

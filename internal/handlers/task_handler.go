@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gorilla/mux"
+	"github.com/sriraghariharan/gotasks/internal/middleware"
 	"github.com/sriraghariharan/gotasks/internal/models"
 	service "github.com/sriraghariharan/gotasks/internal/services"
 	"github.com/sriraghariharan/gotasks/internal/validators"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -69,4 +72,50 @@ func GetAllTasksHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(allTasks)
+}
+
+func DeleteTaskHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	//get task id from request
+	params := mux.Vars(r)
+	taskID := params["id"]
+
+	//check if taskId is a valid mongodb
+	taskObjectID, err := bson.ObjectIDFromHex(taskID)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Invalid task ID",
+		})
+		return
+	}
+
+	ctx := r.Context()
+
+	//extract userId from context
+	userObjectID, ok := ctx.Value(middleware.UserIDKey).(bson.ObjectID)
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "user not found in context",
+		})
+		return
+	}
+
+	_, err = service.DeleteTask(ctx, taskObjectID, userObjectID)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Task deleted successfully",
+	})
 }

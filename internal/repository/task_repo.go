@@ -49,17 +49,11 @@ func GetTaskDetails(ctx context.Context, taskID string) (models.Task, error) {
 }
 
 //get all tasks for a user
-func GetAllTasksForUser(ctx context.Context, userID string) ([]models.Task, error) {
+func GetAllTasksForUser(ctx context.Context, userID bson.ObjectID) ([]models.Task, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
-	fmt.Println("userid", userID)
 
-	userObjectID, err := bson.ObjectIDFromHex(userID)
-	if err != nil {
-		return []models.Task{}, errors.New("Invalid user ID")
-	}
-
-	filter := bson.M{"userId": userObjectID}
+	filter := bson.M{"userId": userID}
 
 	cursor, err := database.TasksCollection.Find(ctx, filter)
 
@@ -74,7 +68,25 @@ func GetAllTasksForUser(ctx context.Context, userID string) ([]models.Task, erro
 		return []models.Task{}, errors.New("Unable to get tasks")
 	}
 
-	fmt.Println("tasks", tasks)
-
 	return tasks, nil
+}
+
+// delete task
+func DeleteTask(ctx context.Context, taskID bson.ObjectID, userID bson.ObjectID) (bool, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{"_id": taskID, "userId": userID}
+
+	deletionResp, err := database.TasksCollection.DeleteOne(ctx, filter)
+
+	if deletionResp.DeletedCount == 0 {
+		return false, errors.New("Task not found")
+	}
+
+	if err != nil {
+		return false, errors.New("Unable to delete task")
+	}
+
+	return true, nil
 }
