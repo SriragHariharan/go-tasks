@@ -53,3 +53,24 @@ func GetUserPassword(ctx context.Context, userEmail string) (string, error){
 	
 	return existingUser.Password, nil
 }
+
+func GetUserDetails(ctx context.Context, email string) (models.User, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{"email": email}
+
+	var userDetails models.User
+	err := database.UsersCollection.FindOne(ctx, filter).Decode(&userDetails)
+
+	fmt.Printf("user details:%+v", userDetails)
+
+	if err != nil {
+		return models.User{}, errors.New("Unable to get details")
+	}
+
+	//remove password from user obj
+	userDetails.Password = ""
+	
+	return userDetails, nil
+}

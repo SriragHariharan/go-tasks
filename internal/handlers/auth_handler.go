@@ -38,7 +38,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request){
 	ctx := r.Context()
 	
 	//send user to service layer
-	newUserFromDb, err := service.CreateNewUser(ctx, newUser)
+	token, err := service.CreateNewUser(ctx, newUser)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -49,7 +49,9 @@ func SignupHandler(w http.ResponseWriter, r *http.Request){
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(newUserFromDb)
+	json.NewEncoder(w).Encode(map[string]string{
+		"token": token,
+	})
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +81,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 	//call the service layer
-	userDetails, err := service.LoginUser(ctx, &existingUser)
+	token, err := service.LoginUser(ctx, &existingUser)
 	
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -90,5 +92,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(userDetails)
+	json.NewEncoder(w).Encode(map[string]string{
+		"token": token,
+	})
 }
