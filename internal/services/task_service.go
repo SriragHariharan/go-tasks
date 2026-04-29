@@ -4,20 +4,14 @@ import (
 	"context"
 	"errors"
 
-	"github.com/sriraghariharan/gotasks/internal/middleware"
 	"github.com/sriraghariharan/gotasks/internal/models"
 	repo "github.com/sriraghariharan/gotasks/internal/repository"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-func CreateTask(ctx context.Context, task models.Task) (models.Task, error) {
+func CreateTask(ctx context.Context, task models.Task, userID bson.ObjectID) (models.Task, error) {
 
-	userObjectID, ok := ctx.Value(middleware.UserIDKey).(bson.ObjectID)
-	if !ok {
-		return models.Task{}, errors.New("user not found in context")
-	}
-
-	task.UserId = userObjectID
+	task.UserId = userID
 
 	// TODO: save to DB
 	taskId, err := repo.CreateNewTask(ctx, task)
@@ -31,15 +25,9 @@ func CreateTask(ctx context.Context, task models.Task) (models.Task, error) {
 	return task, nil
 }
 
-func GetAllTasks(ctx context.Context) ([]models.Task, error) {
+func GetAllTasks(ctx context.Context, userID bson.ObjectID) ([]models.Task, error) {
 
-	// get UserId from context object
-	userObjectID, ok := ctx.Value(middleware.UserIDKey).(bson.ObjectID)
-	if !ok {
-		return []models.Task{}, errors.New("user not found in context")
-	}
-
-	allTasks, err := repo.GetAllTasksForUser(ctx, userObjectID)
+	allTasks, err := repo.GetAllTasksForUser(ctx, userID)
 
 	if err != nil {
 		return []models.Task{}, err
@@ -48,6 +36,30 @@ func GetAllTasks(ctx context.Context) ([]models.Task, error) {
 	return allTasks, nil
 }
 
+//update task
+func UpdateTask(ctx context.Context, taskId bson.ObjectID, task models.Task, userID bson.ObjectID) (models.Task, error) {
+
+	taskUpdated, err := repo.UpdateTask(ctx, taskId, task, userID)
+
+	if err != nil {
+		return models.Task{}, err
+	}
+
+	if taskUpdated == false {
+		return models.Task{}, errors.New("Unable to update task")
+	}
+
+	//fetch task details
+	taskDetails, err := repo.GetTaskDetails(ctx, taskId)
+
+	if err != nil {
+		return models.Task{}, err
+	}
+
+	return taskDetails, nil
+}
+
+//delete task
 func DeleteTask(ctx context.Context, taskID bson.ObjectID, userID bson.ObjectID) (bool, error) {
 
 	taskDeleted, err := repo.DeleteTask(ctx, taskID, userID)

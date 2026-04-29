@@ -15,7 +15,11 @@ const UserIDKey contextKey = "userId"
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		
+		//set content type
+		w.Header().Set("Content-Type", "application/json")
 
+		// verify auth header
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			http.Error(w, "missing Authorization header", http.StatusUnauthorized)
@@ -50,5 +54,6 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		// pass to next handler
 		next.ServeHTTP(w, r.WithContext(ctx))
+
 	})
 }

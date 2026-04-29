@@ -13,6 +13,7 @@ func TaskRoutes() *mux.Router {
 	r.Use(middleware.AuthMiddleware)
 
 	r.HandleFunc("/", handler.CreateTaskHandler).Methods("POST")
+	r.HandleFunc("/{id}", handler.UpdateTaskHandler).Methods("PUT")
 	r.HandleFunc("/{id}", handler.DeleteTaskHandler).Methods("DELETE")
 	r.HandleFunc("/all", handler.GetAllTasksHandler).Methods("GET")
 

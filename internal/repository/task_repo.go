@@ -27,19 +27,14 @@ func CreateNewTask(ctx context.Context, task models.Task) (bson.ObjectID, error)
 }
 
 // Get task details
-func GetTaskDetails(ctx context.Context, taskID string) (models.Task, error) {
+func GetTaskDetails(ctx context.Context, taskID bson.ObjectID) (models.Task, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	taskObjectID, err := bson.ObjectIDFromHex(taskID)
-	if err != nil {
-		return models.Task{}, errors.New("Invalid task ID")
-	}
-
-	filter := bson.M{"_id": taskObjectID}
+	filter := bson.M{"_id": taskID}
 
 	var taskDetails models.Task
-	err = database.TasksCollection.FindOne(ctx, filter).Decode(&taskDetails)
+	err := database.TasksCollection.FindOne(ctx, filter).Decode(&taskDetails)
 
 	if err != nil {
 		return models.Task{}, errors.New("Unable to get task details")
@@ -69,6 +64,34 @@ func GetAllTasksForUser(ctx context.Context, userID bson.ObjectID) ([]models.Tas
 	}
 
 	return tasks, nil
+}
+
+// update task
+func UpdateTask(ctx context.Context, taskId bson.ObjectID, task models.Task, userID bson.ObjectID) (bool, error) {
+
+	fmt.Println(taskId, task, userID)
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{"_id": taskId, "userId": userID}
+
+	update := bson.M{"$set": bson.M{"title": task.Title, "isCompleted": task.IsCompleted}}
+
+	updateResp, err := database.TasksCollection.UpdateOne(ctx, filter, update)
+
+	fmt.Printf("%+v\n", updateResp)
+	fmt.Println(err)
+	
+	if err != nil {
+		return false, errors.New("Unable to update task")
+	}
+
+	if updateResp.ModifiedCount == 0 {
+		return false, errors.New("Unable to update task")
+	}
+
+	return true, nil	
 }
 
 // delete task
